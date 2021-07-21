@@ -1,21 +1,15 @@
 # Testing your port
 
-It's important to test your port at the end of each module porting, rather than only once when you've imported all modules. There are two testing methods:
-
-1. Running the Mbed OS built-in tests with *Greentea*.
-1. Manually running the Mbed OS built-in tests.
+It's important to test your port at the end of each module porting, rather than only once when you've imported all modules. 
 
 ## Testing with the Greentea framework
-
-Read the following page to understand how tests are structured:
 
 ### Prerequisites
 
 #### Minimum HAL module support
 
-To run the Mbed OS built-in tests, you need to have ported and verified at least these HAL modules:
+To run the built-in tests, you need to have ported and verified at least these HAL modules:
 
-- Low power ticker.
 - Serial port (synchronous transfer). To verify that it works, load a test binary with `printf()`. Verify debug messages can be seen on your serial terminal program.
 - Microsecond ticker.
 
@@ -23,190 +17,136 @@ To run the Mbed OS built-in tests, you need to have ported and verified at least
 You'll also need to have ported DAPLink or compatible interface firmware to your interface chip.
     <span class="notes">If DAPLink is still under development, you can still run tests manually.</span>
 
-#### mbedls
+#### mbed-tools
 
-The platform under test needs to be supported in mbedls for automated tests to work.
+Some tools from Mbed, including `mbedhtrun`, are required to run Greentea tests.
 
-If an updated mbedls pip package including support for your platform hasn't been released yet, you need to direct pip to use your local directory (which includes the code changes to support the new platform):
+See [docs](../../user/README.md) about tools setup.
+### Compiling tests
 
-1. Clone [https://github.com/ARMmbed/mbed-os-tools](https://github.com/ARMmbed/mbed-os-tools).
-1. [Add your target to the platform database](https://github.com/ARMmbed/mbed-os-tools/tree/master/packages/mbed-ls#adding-platform-support)
-1. Run `pip install --editable <your_local_root_to_mbed-os-tools>`.
-1. Run `pip install --editable <your_local_root_to_mbed-os-tools>/packages/mbed-ls`.
-1. If you're using an external serial probe (like an FTDI USB cable), create an `mbedls.json` file and specify the serial port.
-
-    The serial port path varies in different operation systems. On **Windows**, you can find it through Device Manager; it will usually be something like `COM#`. On **Mac OS** you can use `ls /dev/tty.usb*`. On Linux you can use `ls /dev/ttyACM*`. The format of `mbedls.json` is as follows:
-
-    ```
-    {
-        "33000000e062afa300000000000000000000000097969902": {
-            "serial_port": "/dev/tty.usbserial-FTGDJJOC"
-        }
-    }
-    ```
-
-    Where `"33000000e062afa300000000000000000000000097969902"` is the correct target id.
-
-### Compiling and running tests
-
-1. Compile the tests:
-    - To compile all tests, run `mbed test --compile`.
-    - To see the list of compiled tests, run `mbed test --compile-list`.
-    - To compile a specific test, run  `mbed test --compile -n <test_name>`. For example: `mbed test --compile -n mbed-os-tests-concurrent-gpio)`.
-1. To run your tests, run `mbed test --run`.
-
-
-Here is an example of a successful run:
-
-<!-- Needs to be updated with output from mbed-cli (mbed test) -->
-```
-mbed test --run -n tests-concurrent-gpio
-mbedgt: greentea test automation tool ver. 1.4.0
-mbedgt: using multiple test specifications from current directory!
-    using 'BUILD/tests/CC3220SF/GCC_ARM/test_spec.json'
-mbedgt: detecting connected mbed-enabled devices...
-mbedgt: detected 1 device
-mbedgt: processing target 'CC3220SF' toolchain 'GCC_ARM' compatible platforms... (note: switch set to --parallel 1)
-mbedgt: running 1 test for platform 'CC3220SF' and toolchain 'GCC_ARM'
-mbedgt: mbed-host-test-runner: started
-mbedgt: checking for GCOV data...
-mbedgt: test on hardware with target id: 33000000e062afa300000000000000000000000097969902
-mbedgt: test suite 'tests-concurrent-gpio' ........................................................... OK in 19.25 sec
-    test case: 'Concurrent testing of DIO(D0,D1), and InterruptIn(D2,D3)' ........................ OK in 0.09 sec
-    test case: 'Concurrent testing of DIO(D1,D0), and InterruptIn(D3,D2)' ........................ OK in 0.07 sec
-    test case: 'Concurrent testing of DIO(D2,D3), and InterruptIn(D4,D5)' ........................ OK in 0.08 sec
-    test case: 'Concurrent testing of DIO(D3,D2), and InterruptIn(D5,D4)' ........................ OK in 0.10 sec
-    test case: 'Concurrent testing of DIO(D4,D5), and InterruptIn(D0,D1)' ........................ OK in 0.09 sec
-    test case: 'Concurrent testing of DIO(D4,D5), and InterruptIn(D2,D3)' ........................ OK in 0.10 sec
-    test case: 'Concurrent testing of DIO(D5,D4), and InterruptIn(D1,D0)' ........................ OK in 0.09 sec
-    test case: 'Concurrent testing of DIO(D5,D4), and InterruptIn(D3,D2)' ........................ OK in 0.09 sec
-    test case: 'Concurrent testing of DIO(D6,D7), and InterruptIn(D8,D9)' ........................ OK in 0.09 sec
-    test case: 'Concurrent testing of DIO(D7,D6), and InterruptIn(D9,D8)' ........................ OK in 0.10 sec
-    test case: 'Concurrent testing of DIO(D8,D9), and InterruptIn(D2,D3)' ........................ OK in 0.08 sec
-    test case: 'Concurrent testing of DIO(D9,D8), and InterruptIn(D3,D2)' ........................ OK in 0.10 sec
-mbedgt: test case summary: 12 passes, 0 failures
-mbedgt: all tests finished!
-mbedgt: shuffle seed: 0.3988791596
-mbedgt: test suite report:
-+------------------+---------------+-----------------------+--------+--------------------+-------------+
-| target           | platform_name | test suite            | result | elapsed_time (sec) | copy_method |
-+------------------+---------------+-----------------------+--------+--------------------+-------------+
-| CC3220SF-GCC_ARM | CC3220SF      | tests-concurrent-gpio | OK     | 19.25              | default     |
-+------------------+---------------+-----------------------+--------+--------------------+-------------+
-mbedgt: test suite results: 1 OK
-mbedgt: test case report:
-+------------------+---------------+-----------------------+----------------------------------------------------------+--------+--------+--------+--------------------+
-| target           | platform_name | test suite            | test case                                                | passed | failed | result | elapsed_time (sec) |
-+------------------+---------------+-----------------------+----------------------------------------------------------+--------+--------+--------+--------------------+
-| CC3220SF-GCC_ARM | CC3220SF      | tests-concurrent-gpio | Concurrent testing of DIO(D0,D1), and InterruptIn(D2,D3) | 1      | 0      | OK     | 0.09               |
-| CC3220SF-GCC_ARM | CC3220SF      | tests-concurrent-gpio | Concurrent testing of DIO(D1,D0), and InterruptIn(D3,D2) | 1      | 0      | OK     | 0.07               |
-| CC3220SF-GCC_ARM | CC3220SF      | tests-concurrent-gpio | Concurrent testing of DIO(D2,D3), and InterruptIn(D4,D5) | 1      | 0      | OK     | 0.08               |
-| CC3220SF-GCC_ARM | CC3220SF      | tests-concurrent-gpio | Concurrent testing of DIO(D3,D2), and InterruptIn(D5,D4) | 1      | 0      | OK     | 0.1                |
-| CC3220SF-GCC_ARM | CC3220SF      | tests-concurrent-gpio | Concurrent testing of DIO(D4,D5), and InterruptIn(D0,D1) | 1      | 0      | OK     | 0.09               |
-| CC3220SF-GCC_ARM | CC3220SF      | tests-concurrent-gpio | Concurrent testing of DIO(D4,D5), and InterruptIn(D2,D3) | 1      | 0      | OK     | 0.1                |
-| CC3220SF-GCC_ARM | CC3220SF      | tests-concurrent-gpio | Concurrent testing of DIO(D5,D4), and InterruptIn(D1,D0) | 1      | 0      | OK     | 0.09               |
-| CC3220SF-GCC_ARM | CC3220SF      | tests-concurrent-gpio | Concurrent testing of DIO(D5,D4), and InterruptIn(D3,D2) | 1      | 0      | OK     | 0.09               |
-| CC3220SF-GCC_ARM | CC3220SF      | tests-concurrent-gpio | Concurrent testing of DIO(D6,D7), and InterruptIn(D8,D9) | 1      | 0      | OK     | 0.09               |
-| CC3220SF-GCC_ARM | CC3220SF      | tests-concurrent-gpio | Concurrent testing of DIO(D7,D6), and InterruptIn(D9,D8) | 1      | 0      | OK     | 0.1                |
-| CC3220SF-GCC_ARM | CC3220SF      | tests-concurrent-gpio | Concurrent testing of DIO(D8,D9), and InterruptIn(D2,D3) | 1      | 0      | OK     | 0.08               |
-| CC3220SF-GCC_ARM | CC3220SF      | tests-concurrent-gpio | Concurrent testing of DIO(D9,D8), and InterruptIn(D3,D2) | 1      | 0      | OK     | 0.1                |
-+------------------+---------------+-----------------------+----------------------------------------------------------+--------+--------+--------+--------------------+
-mbedgt: test case results: 12 OK
-mbedgt: completed in 20.24 sec
-```
-
-## Manual testing
-
-You may want to run tests manually, for example if DAPLink is still under development. You will need to export your tests from Greentea and import them to your IDE. For example:
-
-1. Find the test directory:
-
-    ```
-    mbed test -m <new_target> -t gcc_arm --compile-list -n mbed-os-tests-mbed_hal-common_ticker
-    ```
-
-1. Copy the source code to the project root directory:
-
-    ```
-    cd <separate folder from existing porting project>
-    cp -R mbed-os-example-blinky/mbed-os/TESTS/mbed_hal/common_tickers .
-    cd common_tickers
-    mbed new --create-only .
-    ```
-
-1. Copy the `mbed-os` directory:
-
-    ```
-    cp -R ../mbed-os-example-blinky/mbed-os .
-    ```
-
-1. Export to a makefile project:
-
-    ```
-    mbed export -i <exporter> -m <new_target>
-    ```
-
-1. Flash the program with pyOCD (using the same configuration you used when you initially set up pyOCD).
-
-1. Run the program:
-
-    ```
-    # mbedhtrun --skip-flashing --skip-reset -p <serial port>:9600 -e mbed-os/TESTS/host_tests
-    ```
-
-    Customize the serial port path and baudrate as needed.
-
-
-## Mbed OS built-in tests - detailed procedure
-
-Whether you're using Greentea or performing manual tests, the procedure for using the built-in Mbed OS tests is the same.
-
-To build and run the Mbed OS tests:
-
-1. Build the tests:
-
+1. Go to the directory containing the `CMakeLists.txt` file of the test you want to run, e.g. `MCU-Driver-Arm/sdfx_arm/tests/mbed_hal/echo/`.
+2. Generate the build system files
    ```
-   mbed test -m <new_target> -t gcc_arm --compile
+   cmake -S . -B cmake_build
+   ```
+   The default toolchain is GCC_ARM. You can use a different toolchain by passing `-D MBED_TOOLCHAIN=<TOOLCHAIN>`. If you need to debug the binary, build with `-D CMAKE_BUILD_TYPE=debug`.
+4. Compile the test
+   ```
+   cmake --build cmake_build -j
    ```
 
-   If you see some build errors, it means that some HAL modules required to run the tests are missing and need porting.
+### Running the tests
 
-1. You can see the full list of built tests:
+Use `mbedhtrun` with the following options to run a test:
+* `-f <path/to/test/binary.bin>` This is the path to the binary built above.
+* `-e <path/to/host_tests/directory>` This will usually be `/MCU-Driver-HAL/tests/host_tests`.
+* `-d <path/to/DAPLINK/mount/point>` This is the place where you usually drag-and-drop binaries when you flash your hardware via DAPLINK.
+* `-p <path/to/tty/port>:115200` This is the serial interface that Greentea will use to talk to your hardware.
 
-    ```
-    mbed test -m <new_target> -t gcc_arm --compile-list
-    ```
+Example command line:
+```
+mbedhtrun -f ./sdfx_st/tests/mbed_hal/echo/cmake_build/sdfx-st-test-echo.bin -e ./MCU-Driver-HAL/tests/host_tests -d /Volumes/DIS_L4IOT -p /dev/tty.usbmodem145103:115200
+```
 
-1. Test images are located under the following directory:
+If your hardware doesn't have a DAPLINK interface, you must flash the test binary manually via other means, then manually reset the hardware. Then, run `mbedhtrun` with the `--skip-reset --skip-flashing` options, omitting the `-f` and `-d` arguments.
 
-    ```
-    mbed-os-example-blinky/BUILD/tests/<new_target>/gcc_arm/mbed-os/
-    ```
+Example command line (without DAPLINK):
+```
+mbedhtrun -e ./MCU-Driver-HAL/tests/host_tests -p /dev/tty.usbmodem145103:115200 --skip-reset --skip-flashing
+```
 
-    For example:
+#### Expected output
 
-    ```
-    $ mbed test -m <new_target> -t gcc_arm --compile-list -n *tickers*
+Greentea output for a test that ran successfully looks like this:
 
-    Test Case:
-        Name: tests-mbed_hal-common_tickers
-        Path: ./TESTS/mbed_hal/common_tickers
-    Test Case:
-        Name: tests-mbed_hal-common_tickers_freq
-        Path: ./TESTS/mbed_hal/common_tickers_freq
-    ```
+```
+mbedhtrun -f ./sdfx_st/tests/mbed_hal/echo/cmake_build/sdfx-st-test-echo.bin -e ./MCU-Driver-HAL/tests/host_tests -d /Volumes/DIS_L4IOT -p /dev/tty.usbmodem145103:115200
 
-    In this example:
-
-    - The `common_tickers` test image is at `mbed-os-example-blinky/BUILD/tests/<new_target>/gcc_arm/mbed-os/TESTS/mbed_hal/common_tickers`.
-    - The `common_tickers_freq` test image is at `mbed-os-example-blinky/BUILD/tests/<new_target>/gcc_arm/mbed-os/TESTS/mbed_hal/common_tickers_freq.`
-
-1. You need to flash the test image to the board. You can use the pyOCD flash tool (from the command line or IDE):
-
-    ```
-    pyocd-flashtool BUILD/mbed-os-example-blinky.bin    # Use the .hex file if appropriate
-    ```
-
-1. Before you begin the test run, please make sure the serial port is not already opened by programs like Screen or Teraterm (close them if they're open). In addition, verify `mbedls` lists the new target device.
-
-    If your test run doesn't start, please read about [troubleshooting Greentea](https://github.com/ARMmbed/mbed-os-tools/tree/master/packages/mbed-greentea#common-issues).
+[1626879922.99][HTST][INF] host test executor ver. 0.0.12
+[1626879922.99][HTST][INF] copy image onto target...
+[1626879928.12][MBED][WRN] Target ID not found: Skipping flash check and retry
+[1626879928.13][HTST][INF] starting host test process...
+[1626879928.13][CONN][INF] starting connection process...
+[1626879928.14][CONN][INF] notify event queue about extra 60 sec timeout for serial port pooling
+[1626879928.14][CONN][INF] initializing serial port listener... 
+[1626879928.14][SERI][INF] serial(port=/dev/tty.usbmodem145103, baudrate=115200, read_timeout=0.01, write_timeout=5)
+[1626879928.14][HTST][INF] setting timeout to: 60 sec
+[1626879928.14][SERI][INF] reset device using 'default' plugin...
+[1626879928.54][SERI][INF] waiting 1.00 sec after reset
+[1626879929.54][SERI][INF] wait for it...
+[1626879929.55][SERI][TXD] mbedmbedmbedmbedmbedmbedmbedmbedmbedmbed
+[1626879929.55][CONN][INF] sending up to 2 __sync packets (specified with --sync=2)
+[1626879929.55][CONN][INF] sending preamble '6d857b5d-7a15-4a79-b552-41eeef505818'
+[1626879929.55][SERI][TXD] {{__sync;6d857b5d-7a15-4a79-b552-41eeef505818}}
+[1626879929.56][CONN][RXD] mbedmbedmbedmbedmbedmbedmbedmbed
+[1626879929.57][CONN][INF] found SYNC in stream: {{__sync;6d857b5d-7a15-4a79-b552-41eeef505818}} it is #0 sent, queued...
+[1626879929.57][CONN][INF] found KV pair in stream: {{__version;1.3.0}}, queued...
+[1626879929.57][CONN][INF] found KV pair in stream: {{__timeout;30}}, queued...
+[1626879929.57][HTST][INF] sync KV found, uuid=6d857b5d-7a15-4a79-b552-41eeef505818, timestamp=1626879929.569591
+[1626879929.57][CONN][INF] found KV pair in stream: {{__host_test_name;device_echo}}, queued...
+[1626879929.57][HTST][INF] DUT greentea-client version: 1.3.0
+[1626879929.57][HTST][INF] setting timeout to: 30 sec
+[1626879929.57][HTST][INF] host test class: '<class 'device_echo.Device_Echo'>'
+[1626879929.57][HTST][INF] host test setup() call...
+[1626879929.57][HTST][INF] CALLBACKs updated
+[1626879929.57][HTST][INF] host test detected: device_echo
+[1626879929.58][CONN][RXD] >>> Running 1 test cases...
+[1626879929.58][CONN][RXD] 
+[1626879929.58][CONN][RXD] >>> Running case #1: 'Echo server: x16'...
+[1626879929.58][CONN][INF] found KV pair in stream: {{__testcase_count;1}}, queued...
+[1626879929.58][CONN][INF] found KV pair in stream: {{__testcase_name;Echo server: x16}}, queued...
+[1626879929.59][CONN][INF] found KV pair in stream: {{__testcase_start;Echo server: x16}}, queued...
+[1626879929.59][CONN][INF] found KV pair in stream: {{echo_count;16}}, queued...
+[1626879929.61][SERI][TXD] {{echo_count;16}}
+[1626879929.62][CONN][INF] found KV pair in stream: {{echo;abcdefghijklmnopqrstuvwxyzabcdefghi}}, queued...
+[1626879929.63][SERI][TXD] {{echo;abcdefghijklmnopqrstuvwxyzabcdefghi}}
+[1626879929.64][CONN][INF] found KV pair in stream: {{echo;klmnopqrstuvwxyzabcdefghijklmnopqrs}}, queued...
+[1626879929.65][SERI][TXD] {{echo;klmnopqrstuvwxyzabcdefghijklmnopqrs}}
+[1626879929.66][CONN][INF] found KV pair in stream: {{echo;uvwxyzabcdefghijklmnopqrstuvwxyzabc}}, queued...
+[1626879929.67][SERI][TXD] {{echo;uvwxyzabcdefghijklmnopqrstuvwxyzabc}}
+[1626879929.69][CONN][INF] found KV pair in stream: {{echo;efghijklmnopqrstuvwxyzabcdefghijklm}}, queued...
+[1626879929.70][SERI][TXD] {{echo;efghijklmnopqrstuvwxyzabcdefghijklm}}
+[1626879929.71][CONN][INF] found KV pair in stream: {{echo;opqrstuvwxyzabcdefghijklmnopqrstuvw}}, queued...
+[1626879929.72][SERI][TXD] {{echo;opqrstuvwxyzabcdefghijklmnopqrstuvw}}
+[1626879929.73][CONN][INF] found KV pair in stream: {{echo;yzabcdefghijklmnopqrstuvwxyzabcdefg}}, queued...
+[1626879929.74][SERI][TXD] {{echo;yzabcdefghijklmnopqrstuvwxyzabcdefg}}
+[1626879929.75][CONN][INF] found KV pair in stream: {{echo;ijklmnopqrstuvwxyzabcdefghijklmnopq}}, queued...
+[1626879929.77][SERI][TXD] {{echo;ijklmnopqrstuvwxyzabcdefghijklmnopq}}
+[1626879929.78][CONN][INF] found KV pair in stream: {{echo;stuvwxyzabcdefghijklmnopqrstuvwxyza}}, queued...
+[1626879929.79][SERI][TXD] {{echo;stuvwxyzabcdefghijklmnopqrstuvwxyza}}
+[1626879929.80][CONN][INF] found KV pair in stream: {{echo;cdefghijklmnopqrstuvwxyzabcdefghijk}}, queued...
+[1626879929.81][SERI][TXD] {{echo;cdefghijklmnopqrstuvwxyzabcdefghijk}}
+[1626879929.82][CONN][INF] found KV pair in stream: {{echo;mnopqrstuvwxyzabcdefghijklmnopqrstu}}, queued...
+[1626879929.83][SERI][TXD] {{echo;mnopqrstuvwxyzabcdefghijklmnopqrstu}}
+[1626879929.85][CONN][INF] found KV pair in stream: {{echo;wxyzabcdefghijklmnopqrstuvwxyzabcde}}, queued...
+[1626879929.86][SERI][TXD] {{echo;wxyzabcdefghijklmnopqrstuvwxyzabcde}}
+[1626879929.87][CONN][INF] found KV pair in stream: {{echo;ghijklmnopqrstuvwxyzabcdefghijklmno}}, queued...
+[1626879929.88][SERI][TXD] {{echo;ghijklmnopqrstuvwxyzabcdefghijklmno}}
+[1626879929.89][CONN][INF] found KV pair in stream: {{echo;qrstuvwxyzabcdefghijklmnopqrstuvwxy}}, queued...
+[1626879929.90][SERI][TXD] {{echo;qrstuvwxyzabcdefghijklmnopqrstuvwxy}}
+[1626879929.91][CONN][INF] found KV pair in stream: {{echo;abcdefghijklmnopqrstuvwxyzabcdefghi}}, queued...
+[1626879929.93][SERI][TXD] {{echo;abcdefghijklmnopqrstuvwxyzabcdefghi}}
+[1626879929.94][CONN][INF] found KV pair in stream: {{echo;klmnopqrstuvwxyzabcdefghijklmnopqrs}}, queued...
+[1626879929.95][SERI][TXD] {{echo;klmnopqrstuvwxyzabcdefghijklmnopqrs}}
+[1626879929.96][CONN][INF] found KV pair in stream: {{echo;uvwxyzabcdefghijklmnopqrstuvwxyzabc}}, queued...
+[1626879929.97][SERI][TXD] {{echo;uvwxyzabcdefghijklmnopqrstuvwxyzabc}}
+[1626879929.98][CONN][INF] found KV pair in stream: {{__testcase_finish;Echo server: x16;1;0}}, queued...
+[1626879929.99][CONN][RXD] >>> 'Echo server: x16': 1 passed, 0 failed
+[1626879929.99][CONN][RXD] 
+[1626879929.99][CONN][RXD] >>> Test cases: 1 passed, 0 failed
+[1626879929.99][CONN][INF] found KV pair in stream: {{__testcase_summary;1;0}}, queued...
+[1626879929.99][CONN][INF] found KV pair in stream: {{end;success}}, queued...
+[1626879929.99][CONN][INF] found KV pair in stream: {{__exit;0}}, queued...
+[1626879929.99][HTST][INF] __exit(0)
+[1626879930.00][HTST][INF] __notify_complete(True)
+[1626879930.00][HTST][INF] __exit_event_queue received
+[1626879930.00][HTST][INF] test suite run finished after 0.42 sec...
+[1626879930.00][CONN][INF] received special event '__host_test_finished' value='True', finishing
+[1626879930.01][HTST][INF] CONN exited with code: 0
+[1626879930.01][HTST][INF] Some events in queue
+[1626879930.01][HTST][INF] stopped consuming events
+[1626879930.01][HTST][INF] host test result() call skipped, received: True
+[1626879930.01][HTST][INF] calling blocking teardown()
+[1626879930.01][HTST][INF] teardown() finished
+[1626879930.01][HTST][INF] {{result;success}}
+```
