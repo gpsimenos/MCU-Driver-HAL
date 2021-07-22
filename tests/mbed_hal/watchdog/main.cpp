@@ -18,13 +18,15 @@
 #error [NOT_SUPPORTED] Watchdog not supported for this target
 #else
 
+#include <stdio.h>
+#include <string.h>
 #include "greentea-client/test_env.h"
 #include "hal/watchdog_api.h"
 #include "mbed_wait_api.h"
 #include "unity/unity.h"
 #include "utest/utest.h"
 #include "watchdog_api_tests.h"
-#include "mbed.h"
+#include "greentea-custom_io/custom_io.h"
 
 #include <stdlib.h>
 
@@ -100,7 +102,8 @@ void test_stop()
     TEST_ASSERT_EQUAL(WATCHDOG_STATUS_OK, hal_watchdog_init(&WDG_CONFIG_DEFAULT));
     TEST_ASSERT_EQUAL(WATCHDOG_STATUS_OK, hal_watchdog_stop());
     // Make sure that a disabled watchdog does not reset the core.
-    ThisThread::sleep_for(2 * WDG_TIMEOUT_MS); // Watchdog should fire before twice the timeout value.
+    // ThisThread::sleep_for(2 * WDG_TIMEOUT_MS); // Watchdog should fire before twice the timeout value.
+    wait_us(2 * WDG_TIMEOUT_MS * 1000);
 
     TEST_ASSERT_EQUAL(WATCHDOG_STATUS_OK, hal_watchdog_stop());
 }
@@ -154,8 +157,10 @@ utest::v1::status_t case_teardown_sync_on_reset(const Case *const source, const 
     }
     // Start kicking the watchdog during teardown.
     hal_watchdog_kick();
-    Ticker wdg_kicking_ticker;
-    wdg_kicking_ticker.attach_us(mbed::callback(hal_watchdog_kick), 20000);
+    // Ticker wdg_kicking_ticker;
+    // wdg_kicking_ticker.attach_us(mbed::callback(hal_watchdog_kick), 20000);
+    // can simply stop the watchdog during teardown instead?
+    hal_watchdog_stop();
     utest::v1::status_t status = utest::v1::greentea_case_teardown_handler(source, passed, failed, failure);
     if (failed) {
         /* Return immediately and skip the device reset, if the test case failed.
@@ -170,7 +175,8 @@ utest::v1::status_t case_teardown_sync_on_reset(const Case *const source, const 
     }
     greentea_send_kv(MSG_KEY_DEVICE_RESET, CASE_INDEX_START + CASE_INDEX_CURRENT);
     utest_printf("The device will now restart.\n");
-    ThisThread::sleep_for(SERIAL_FLUSH_TIME_MS); // Wait for the serial buffers to flush.
+    // ThisThread::sleep_for(SERIAL_FLUSH_TIME_MS); // Wait for the serial buffers to flush.
+    wait_us(SERIAL_FLUSH_TIME_MS * 1000);
     NVIC_SystemReset();
     return status; // Reset is instant so this line won't be reached.
 }
@@ -266,6 +272,8 @@ Specification specification((utest::v1::test_setup_handler_t) testsuite_setup_sy
 
 int main()
 {
+    greentea_init_custom_io();
+    
     // Harness will start with a test case index provided by host script.
     return !Harness::run(specification);
 }
