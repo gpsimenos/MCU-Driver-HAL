@@ -188,6 +188,9 @@ add_subdirectory(tests/mbed_hal/trng EXCLUDE_FROM_ALL)
 add_subdirectory(tests/mbed_hal/us_ticker EXCLUDE_FROM_ALL)
 add_subdirectory(tests/mbed_hal/us_ticker_lp_ticker_common EXCLUDE_FROM_ALL)
 add_subdirectory(tests/mbed_hal/us_ticker_lp_ticker_frequency EXCLUDE_FROM_ALL)
+add_subdirectory(tests/mbed_hal/watchdog EXCLUDE_FROM_ALL)
+add_subdirectory(tests/mbed_hal/watchdog_reset EXCLUDE_FROM_ALL)
+add_subdirectory(tests/mbed_hal/watchdog_timing EXCLUDE_FROM_ALL)
 
 # HAL tests with the FPGA CI test shield
 add_subdirectory(tests/mbed_hal_fpga_ci_test_shield/gpio EXCLUDE_FROM_ALL)
