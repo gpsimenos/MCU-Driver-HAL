@@ -18,12 +18,15 @@
 #error [NOT_SUPPORTED] Watchdog not supported for this target
 #else
 
+#include <stdio.h>
+#include <string.h>
 #include "greentea-client/test_env.h"
 #include "utest/utest.h"
 #include "unity/unity.h"
 #include "hal/watchdog_api.h"
 #include "watchdog_reset_tests.h"
-#include "mbed.h"
+#include "greentea-custom_io/custom_io.h"
+#include "mbed_wait_api.h"
 
 #define TIMEOUT_MS 100UL
 
@@ -84,7 +87,7 @@ struct testcase_data {
 
 testcase_data current_case;
 
-Ticker wdg_kicking_ticker;
+// Ticker wdg_kicking_ticker;
 
 bool send_reset_notification(testcase_data *tcdata, uint32_t delay_ms)
 {
@@ -123,7 +126,8 @@ void test_simple_reset()
     // Watchdog reset should have occurred during a wait above.
 
     hal_watchdog_kick();
-    wdg_kicking_ticker.attach_us(mbed::callback(hal_watchdog_kick), 20000); // For testsuite failure handling.
+    // wdg_kicking_ticker.attach_us(mbed::callback(hal_watchdog_kick), 20000); // For testsuite failure handling.
+    hal_watchdog_stop(); // or simply stop watchdog during testsuite failure handling?
     TEST_ASSERT_MESSAGE(0, "Watchdog did not reset the device as expected.");
 }
 
@@ -145,19 +149,21 @@ void test_sleep_reset()
     }
     wait_us(SERIAL_FLUSH_TIME_US); // Wait for the serial buffers to flush.
     TEST_ASSERT_EQUAL(WATCHDOG_STATUS_OK, hal_watchdog_init(&config));
-    sleep_manager_lock_deep_sleep();
-    if (sleep_manager_can_deep_sleep()) {
+    sleep_manager_lock_deep_sleep(); // # TODO # Replace this with MCU-Driver-HAL equivalent
+    if (sleep_manager_can_deep_sleep()) { // # TODO # Replace this with MCU-Driver-HAL equivalent
         TEST_ASSERT_MESSAGE(0, "Deepsleep should be disallowed.");
         return;
     }
     // Watchdog should fire before twice the timeout value.
+    // # TODO # Replace this with MCU-Driver-HAL equivalent sleep method
     ThisThread::sleep_for(2 * TIMEOUT_MS); // Device reset expected.
-    sleep_manager_unlock_deep_sleep();
+    sleep_manager_unlock_deep_sleep(); // # TODO # Replace this with MCU-Driver-HAL equivalent
 
     // Watchdog reset should have occurred during the sleep above.
 
     hal_watchdog_kick();
-    wdg_kicking_ticker.attach_us(mbed::callback(hal_watchdog_kick), 20000); // For testsuite failure handling.
+    // wdg_kicking_ticker.attach_us(mbed::callback(hal_watchdog_kick), 20000); // For testsuite failure handling.
+    hal_watchdog_stop(); // or simply stop watchdog during testsuite failure handling?
     TEST_ASSERT_MESSAGE(0, "Watchdog did not reset the device as expected.");
 }
 
@@ -180,7 +186,7 @@ void test_deepsleep_reset()
     wait_us(SERIAL_FLUSH_TIME_US); // Wait for the serial buffers to flush.
     wait_us(SERIAL_FLUSH_TIME_US); // Wait for the serial buffers to flush.
     TEST_ASSERT_EQUAL(WATCHDOG_STATUS_OK, hal_watchdog_init(&config));
-    if (!sleep_manager_can_deep_sleep()) {
+    if (!sleep_manager_can_deep_sleep()) { // # TODO # Replace this with MCU-Driver-HAL equivalent
         TEST_ASSERT_MESSAGE(0, "Deepsleep should be allowed.");
     }
 
@@ -188,12 +194,14 @@ void test_deepsleep_reset()
     // value when the deepsleep mode is active.
     // To make the test less sensitive to clock/wait accuracy, add 20% extra
     // (making tha whole deepsleep wait equal to 2.2 * timeout).
+    // # TODO # Replace this with MCU-Driver-HAL equivalent sleep method
     ThisThread::sleep_for(220 * TIMEOUT_MS / 100); // Device reset expected.
 
     // Watchdog reset should have occurred during the deepsleep above.
 
     hal_watchdog_kick();
-    wdg_kicking_ticker.attach_us(mbed::callback(hal_watchdog_kick), 20000); // For testsuite failure handling.
+    // wdg_kicking_ticker.attach_us(mbed::callback(hal_watchdog_kick), 20000); // For testsuite failure handling.
+    hal_watchdog_stop(); // or simply stop watchdog during testsuite failure handling?
     TEST_ASSERT_MESSAGE(0, "Watchdog did not reset the device as expected.");
 }
 #endif
@@ -236,7 +244,8 @@ void test_restart_reset()
     // Watchdog reset should have occurred during a wait above.
 
     hal_watchdog_kick();
-    wdg_kicking_ticker.attach_us(mbed::callback(hal_watchdog_kick), 20000); // For testsuite failure handling.
+    // wdg_kicking_ticker.attach_us(mbed::callback(hal_watchdog_kick), 20000); // For testsuite failure handling.
+    hal_watchdog_stop(); // or simply stop watchdog during testsuite failure handling?
     TEST_ASSERT_MESSAGE(0, "Watchdog did not reset the device as expected.");
 }
 
@@ -269,7 +278,8 @@ void test_kick_reset()
     // Watchdog reset should have occurred during a wait above.
 
     hal_watchdog_kick();
-    wdg_kicking_ticker.attach_us(mbed::callback(hal_watchdog_kick), 20000); // For testsuite failure handling.
+    // wdg_kicking_ticker.attach_us(mbed::callback(hal_watchdog_kick), 20000); // For testsuite failure handling.
+    hal_watchdog_stop(); // or simply stop watchdog during testsuite failure handling?
     TEST_ASSERT_MESSAGE(0, "Watchdog did not reset the device as expected.");
 }
 
@@ -325,6 +335,8 @@ Specification specification((utest::v1::test_setup_handler_t) testsuite_setup, c
 
 int main()
 {
+    greentea_init_custom_io();
+    
     // Harness will start with a test case index provided by host script.
     return !Harness::run(specification);
 }
