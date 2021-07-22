@@ -18,13 +18,16 @@
 #error [NOT_SUPPORTED] Watchdog not supported for this target
 #else
 
+#include <stdio.h>
+#include <string.h>
 #include "greentea-client/test_env.h"
 #include "hal/watchdog_api.h"
 #include "unity/unity.h"
 #include "us_ticker_api.h"
 #include "utest/utest.h"
 #include "watchdog_timing_tests.h"
-#include "mbed.h"
+#include "greentea-custom_io/custom_io.h"
+#include "mbed_wait_api.h"
 
 #define TIMEOUT_LOWER_LIMIT_MS 1000ULL
 
@@ -93,17 +96,17 @@ void test_timing()
     // Phase 1. -- run the test code.
     // Send heartbeat messages to host until the watchdeg resets the device.
     const ticker_data_t *const us_ticker = get_us_ticker_data();
-    us_timestamp_t current_ts, next_ts, expected_reset_ts, divider, ts_increment;
+    uint64_t current_ts, next_ts, expected_reset_ts, divider, ts_increment;
     char msg_value[12];
 
     watchdog_config_t config = { timeout_ms };
     TEST_ASSERT_EQUAL(WATCHDOG_STATUS_OK, hal_watchdog_init(&config));
-    next_ts = ticker_read_us(us_ticker);
+    next_ts = us_ticker_read();
     expected_reset_ts = next_ts + 1000ULL * timeout_ms;
 
     divider = 0x2ULL;
     while (1) {
-        current_ts = ticker_read_us(us_ticker);
+        current_ts = us_ticker_read();
         if (current_ts < next_ts) {
             continue;
         }
@@ -220,6 +223,9 @@ Specification specification((utest::v1::test_setup_handler_t) testsuite_setup, c
 
 int main()
 {
+    us_ticker_init();
+    greentea_init_custom_io();
+    
     // Harness will start with a test case index provided by host script.
     return !Harness::run(specification);
 }
