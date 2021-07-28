@@ -24,7 +24,7 @@ Some tools from Mbed, including `mbedhtrun`, are required to run Greentea tests.
 See [docs](../../user/README.md) about tools setup.
 ### Compiling tests
 
-1. Go to the directory containing the `CMakeLists.txt` file of the test you want to run, e.g. `MCU-Driver-Arm/sdfx_arm/tests/mbed_hal/echo/`.
+1. Go to the directory for the example containing the `CMakeLists.txt` file of the test you want to run. This is implementation specific.
 2. Generate the build system files
    ```
    cmake -S . -B cmake_build
