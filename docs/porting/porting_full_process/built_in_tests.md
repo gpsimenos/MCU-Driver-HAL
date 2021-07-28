@@ -52,7 +52,7 @@ If your hardware doesn't have a DAPLINK interface, you must flash the test binar
 
 Example command line (without DAPLINK):
 ```
-mbedhtrun -e ./MCU-Driver-HAL/tests/host_tests -p /dev/tty.usbmodem145103:115200 --skip-reset --skip-flashing
+mbedhtrun -e ./MCU-Driver-HAL/tests/host_tests -p /dev/ttyXXX:115200 --skip-reset --skip-flashing
 ```
 
 #### Expected output
