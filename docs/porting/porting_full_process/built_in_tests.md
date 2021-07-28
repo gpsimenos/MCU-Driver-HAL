@@ -60,7 +60,7 @@ mbedhtrun -e ./MCU-Driver-HAL/tests/host_tests -p /dev/tty.usbmodem145103:115200
 Greentea output for a test that ran successfully looks like this:
 
 ```
-mbedhtrun -f ./sdfx_st/tests/mbed_hal/echo/cmake_build/sdfx-st-test-echo.bin -e ./MCU-Driver-HAL/tests/host_tests -d /Volumes/DIS_L4IOT -p /dev/tty.usbmodem145103:115200
+mbedhtrun -f <executable> -e ./MCU-Driver-HAL/tests/host_tests -d <mounting point> -p /dev/ttyXXX:115200
 
 [1626879922.99][HTST][INF] host test executor ver. 0.0.12
 [1626879922.99][HTST][INF] copy image onto target...
