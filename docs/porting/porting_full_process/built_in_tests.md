@@ -29,7 +29,7 @@ See [docs](../../user/README.md) about tools setup.
    ```
    cmake -S . -B cmake_build
    ```
-   The default toolchain is GCC_ARM. You can use a different toolchain by passing `-D MBED_TOOLCHAIN=<TOOLCHAIN>`. If you need to debug the binary, build with `-D CMAKE_BUILD_TYPE=debug`.
+   The default toolchain is GCC_ARM. You can use a different toolchain by passing `-D MBED_TOOLCHAIN=<TOOLCHAIN>`. The default CMake build type option is `develop`, best for debugging.
 4. Compile the test
    ```
    cmake --build cmake_build -j
