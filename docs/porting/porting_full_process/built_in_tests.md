@@ -45,7 +45,7 @@ Use `mbedhtrun` with the following options to run a test:
 
 Example command line:
 ```
-mbedhtrun -f ./sdfx_st/tests/mbed_hal/echo/cmake_build/sdfx-st-test-echo.bin -e ./MCU-Driver-HAL/tests/host_tests -d /Volumes/DIS_L4IOT -p /dev/tty.usbmodem145103:115200
+mbedhtrun -f <executable> -e ./MCU-Driver-HAL/tests/host_tests -d <mounting point> -p /dev/ttyXXX:115200
 ```
 
 If your hardware doesn't have a DAPLINK interface, you must flash the test binary manually via other means, then manually reset the hardware. Then, run `mbedhtrun` with the `--skip-reset --skip-flashing` options, omitting the `-f` and `-d` arguments.
